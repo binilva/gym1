@@ -149,7 +149,9 @@ class ClientPage extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => AttendanceScreen()),
+                                builder: (context) => AttendanceScreen(
+                                      username: '',
+                                    )),
                           );
                         },
                         child: CircleButton(

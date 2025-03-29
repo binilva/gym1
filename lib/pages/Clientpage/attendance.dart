@@ -3,6 +3,9 @@ import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AttendanceScreen extends StatefulWidget {
+  const AttendanceScreen(
+      {super.key, required String username}); // ✅ Removed username parameter
+
   @override
   _AttendanceScreenState createState() => _AttendanceScreenState();
 }
@@ -10,41 +13,39 @@ class AttendanceScreen extends StatefulWidget {
 class _AttendanceScreenState extends State<AttendanceScreen> {
   final SupabaseClient supabase = Supabase.instance.client;
   DateTime currentMonth = DateTime.now();
-  Map<String, Map<String, bool>> attendance = {};
+  Map<String, bool> attendance = {};
   bool isLoading = false;
-  List<String> selectedNames = [];
-  List<String> availableNames = [];
+  String? userEmail; // ✅ Store logged-in user's email
 
   @override
   void initState() {
     super.initState();
-    fetchAvailableNames();
+    fetchUserEmail();
   }
 
-  Future<void> fetchAvailableNames() async {
-    try {
-      final response = await supabase.from('attendance').select('name');
-
-      final List<String> uniqueNames = response
-          .map<String>((record) => record['name'] as String)
-          .toSet()
-          .toList();
-
-      setState(() {
-        availableNames = uniqueNames;
-      });
-    } catch (error) {
-      print("❌ Error fetching names: $error");
-    }
-  }
-
-  Future<void> fetchAttendance() async {
-    if (selectedNames.isEmpty) {
-      print("❌ No names selected.");
-      return;
-    }
-
+  // ✅ Fetch logged-in user's email
+  Future<void> fetchUserEmail() async {
     setState(() => isLoading = true);
+    try {
+      final user = supabase.auth.currentUser;
+      if (user != null) {
+        userEmail = user.email;
+        fetchAttendance(); // ✅ Fetch attendance once email is retrieved
+      } else {
+        throw "No user logged in!";
+      }
+    } catch (error) {
+      print("❌ Error fetching user email: $error");
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  // ✅ Fetch attendance data for the logged-in user
+  Future<void> fetchAttendance() async {
+    if (userEmail == null) return;
+    setState(() => isLoading = true);
+
     try {
       int lastDay = DateTime(currentMonth.year, currentMonth.month + 1, 0).day;
       String startDate =
@@ -54,30 +55,27 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
 
       final response = await supabase
           .from('attendance')
-          .select()
-          .inFilter('name', selectedNames)
+          .select('date')
+          .eq('email', userEmail!) // ✅ Use the logged-in user's email
           .gte('date', startDate)
           .lte('date', endDate);
 
-      Map<String, Map<String, bool>> fetchedAttendance = {};
+      Map<String, bool> fetchedAttendance = {};
       for (var record in response) {
-        String recordDate = record['date'];
-        String name = record['name'];
-        bool isPresent = record['present'] == true;
-
-        fetchedAttendance.putIfAbsent(recordDate, () => {});
-        fetchedAttendance[recordDate]![name] = isPresent;
+        if (record['date'] != null) {
+          fetchedAttendance[record['date']] = true;
+        }
       }
 
       if (mounted) {
         setState(() {
           attendance = fetchedAttendance;
-          isLoading = false;
         });
       }
     } catch (error) {
       print("❌ Error fetching attendance: $error");
-      if (mounted) setState(() => isLoading = false);
+    } finally {
+      setState(() => isLoading = false);
     }
   }
 
@@ -96,11 +94,8 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
               setState(() {
-                currentMonth = DateTime(
-                  currentMonth.year,
-                  currentMonth.month - 1,
-                  1,
-                );
+                currentMonth =
+                    DateTime(currentMonth.year, currentMonth.month - 1, 1);
                 fetchAttendance();
               });
             },
@@ -109,66 +104,29 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
             icon: const Icon(Icons.arrow_forward),
             onPressed: () {
               setState(() {
-                currentMonth = DateTime(
-                  currentMonth.year,
-                  currentMonth.month + 1,
-                  1,
-                );
+                currentMonth =
+                    DateTime(currentMonth.year, currentMonth.month + 1, 1);
                 fetchAttendance();
               });
             },
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: StatefulBuilder(
-              builder: (context, setStateDropdown) {
-                return DropdownButtonFormField<String>(
-                  isExpanded: true,
-                  decoration: const InputDecoration(
-                    labelText: "Select Name",
-                    border: OutlineInputBorder(),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    userEmail != null ? "User: $userEmail" : "Loading...",
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  items: availableNames.map((name) {
-                    return DropdownMenuItem<String>(
-                      value: name,
-                      child: Text(name),
-                    );
-                  }).toList(),
-                  onChanged: (name) {
-                    if (name != null && !selectedNames.contains(name)) {
-                      setStateDropdown(() {
-                        selectedNames.add(name);
-                      });
-                      setState(() {
-                        fetchAttendance();
-                      });
-                    }
-                  },
-                );
-              },
-            ),
-          ),
-          Wrap(
-            children: selectedNames.map((name) {
-              return Chip(
-                label: Text(name),
-                onDeleted: () {
-                  setState(() {
-                    selectedNames.remove(name);
-                    fetchAttendance();
-                  });
-                },
-              );
-            }).toList(),
-          ),
-          isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : Expanded(
+                ),
+                Expanded(
                   child: GridView.builder(
+                    padding: const EdgeInsets.all(8),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 7,
@@ -178,47 +136,29 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     itemBuilder: (context, index) {
                       String dateKey =
                           "${currentMonth.year}-${currentMonth.month.toString().padLeft(2, '0')}-${(index + 1).toString().padLeft(2, '0')}";
-                      List<String> presentNames =
-                          attendance[dateKey]?.keys.toList() ?? [];
+                      bool isMarked = attendance[dateKey] ?? false;
 
                       return Container(
                         margin: const EdgeInsets.all(2),
                         decoration: BoxDecoration(
-                          color: presentNames.isNotEmpty
-                              ? Colors.blue
-                              : Colors.red,
+                          color: isMarked ? Colors.blue : Colors.grey.shade300,
                           borderRadius: BorderRadius.circular(8),
                         ),
                         alignment: Alignment.center,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "${index + 1}",
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            if (presentNames.isNotEmpty)
-                              ...presentNames.map(
-                                (name) => Text(
-                                  name,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                          ],
+                        child: Text(
+                          "${index + 1}",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: isMarked ? Colors.white : Colors.black,
+                          ),
                         ),
                       );
                     },
                   ),
                 ),
-        ],
-      ),
+              ],
+            ),
     );
   }
 }

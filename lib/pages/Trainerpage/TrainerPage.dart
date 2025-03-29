@@ -6,7 +6,7 @@ import '../Homepage/GymHomePage.dart';
 import 'Addmembers.dart';
 import 'ExercisePage.dart';
 import 'PayPage.dart';
-import 'button2.dart';
+import 'attendance.dart';
 import 'members.dart';
 
 class TrainerPage extends StatelessWidget {
@@ -146,7 +146,8 @@ class TrainerPage extends StatelessWidget {
                           // Navigate to Shop Page
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => button2()),
+                            MaterialPageRoute(
+                                builder: (context) => AttendanceScreen()),
                           );
                         },
                         child: CircleButton(
