@@ -1,0 +1,2 @@
+C:/Users/binil/StudioProjects/Gym-branch/android/app/.cxx/Debug/274s2i59/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/binil/StudioProjects/Gym-branch/android/app/.cxx/Debug/274s2i59/x86_64/CMakeFiles/rebuild_cache.dir

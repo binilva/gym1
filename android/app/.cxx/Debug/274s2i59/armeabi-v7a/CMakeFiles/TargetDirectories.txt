@@ -1,0 +1,2 @@
+C:/Users/binil/StudioProjects/Gym-branch/android/app/.cxx/Debug/274s2i59/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/binil/StudioProjects/Gym-branch/android/app/.cxx/Debug/274s2i59/armeabi-v7a/CMakeFiles/rebuild_cache.dir
