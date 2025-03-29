@@ -7,6 +7,7 @@ import 'Addmembers.dart';
 import 'ExercisePage.dart';
 import 'PayPage.dart';
 import 'button2.dart';
+import 'members.dart';
 
 class TrainerPage extends StatelessWidget {
   final String username;
@@ -51,7 +52,8 @@ class TrainerPage extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () => _confirmLogout(context), // Show confirmation dialog
+            onPressed: () =>
+                _confirmLogout(context), // Show confirmation dialog
           ),
         ],
       ),
@@ -93,7 +95,7 @@ class TrainerPage extends StatelessWidget {
                           // Navigate to the Payment Page
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => PayPage()),
+                            MaterialPageRoute(builder: (context) => member()),
                           );
                         },
                         child: CircleButton(
@@ -129,7 +131,7 @@ class TrainerPage extends StatelessWidget {
                           // Navigate to Shop Page
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => button2()),
+                            MaterialPageRoute(builder: (context) => PayPage()),
                           );
                         },
                         child: CircleButton(
@@ -174,8 +176,6 @@ class TrainerPage extends StatelessWidget {
                       ),
                       SizedBox(height: 15),
                       // Circular Shop Button
-
-
                     ],
                   ),
                 ],

@@ -6,7 +6,6 @@ import '../Trainerpage/TrainerPage.dart';
 import 'ForgotPasswordPage.dart';
 import 'SignUpPage.dart';
 
-
 class LoginPage extends StatefulWidget {
   final bool isTrainer;
   const LoginPage({super.key, required this.isTrainer});
@@ -16,15 +15,15 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _supabase = Supabase.instance.client;
   bool isLoading = false;
 
   Future<void> _login() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Please fill all fields.')));
+    if (_nameController.text.isEmpty || _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please fill all fields.')));
       return;
     }
 
@@ -32,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       final response = await _supabase.auth.signInWithPassword(
-        email: _emailController.text.trim(),
+        email: _nameController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
@@ -49,8 +48,8 @@ class _LoginPageState extends State<LoginPage> {
         // 🛑 If role is missing, prevent login
         if (roleResponse == null || !roleResponse.containsKey('role')) {
           print("ERROR: No role assigned to user!");
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Your account has no assigned role.')));
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Your account has no assigned role.')));
           await _supabase.auth.signOut(); // Log out user to prevent access
           setState(() => isLoading = false);
           return;
@@ -63,12 +62,16 @@ class _LoginPageState extends State<LoginPage> {
         if (role == 'trainer' && widget.isTrainer) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => TrainerPage(username: response.user!.email!)),
+            MaterialPageRoute(
+                builder: (context) =>
+                    TrainerPage(username: response.user!.email!)),
           );
         } else if (role == 'client' && !widget.isTrainer) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => ClientPage(username: response.user!.email!)),
+            MaterialPageRoute(
+                builder: (context) =>
+                    ClientPage(username: response.user!.email!)),
           );
         } else {
           print("ERROR: Unauthorized login attempt.");
@@ -82,13 +85,12 @@ class _LoginPageState extends State<LoginPage> {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(e.message)));
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Something went wrong. Try again.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Something went wrong. Try again.')));
     }
 
     setState(() => isLoading = false);
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
         child: Column(
           children: [
             TextField(
-              controller: _emailController,
+              controller: _nameController,
               decoration: const InputDecoration(labelText: 'Email'),
               keyboardType: TextInputType.emailAddress,
             ),
@@ -116,9 +118,9 @@ class _LoginPageState extends State<LoginPage> {
             isLoading
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
-              onPressed: _login,
-              child: const Text('Login'),
-            ),
+                    onPressed: _login,
+                    child: const Text('Login'),
+                  ),
             TextButton(
               onPressed: () {
                 Navigator.push(
@@ -132,7 +134,8 @@ class _LoginPageState extends State<LoginPage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),
+                  MaterialPageRoute(
+                      builder: (context) => const ForgotPasswordPage()),
                 );
               },
               child: const Text("Forgot Password?"),
