@@ -4,9 +4,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../main.dart';
 import '../Homepage/GymHomePage.dart';
 import 'ExercisePage1.dart';
-import 'PayPage1.dart';
 import 'ShopPage1.dart';
 import 'attendance.dart';
+import 'payment.dart';
 
 class ClientPage extends StatelessWidget {
   final String username;
@@ -94,7 +94,10 @@ class ClientPage extends StatelessWidget {
                           // Navigate to the Payment Page
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => PayPage1()),
+                            MaterialPageRoute(
+                                builder: (context) => PaymentScreen(
+                                      username: '',
+                                    )),
                           );
                         },
                         child: CircleButton(

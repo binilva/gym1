@@ -5,9 +5,9 @@ import '../../main.dart';
 import '../Homepage/GymHomePage.dart';
 import 'Addmembers.dart';
 import 'ExercisePage.dart';
-import 'PayPage.dart';
 import 'attendance.dart';
 import 'members.dart';
+import 'payment.dart';
 
 class TrainerPage extends StatelessWidget {
   final String username;
@@ -131,7 +131,8 @@ class TrainerPage extends StatelessWidget {
                           // Navigate to Shop Page
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => PayPage()),
+                            MaterialPageRoute(
+                                builder: (context) => PaymentListView()),
                           );
                         },
                         child: CircleButton(
