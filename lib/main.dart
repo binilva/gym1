@@ -8,7 +8,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(
     url: 'https://zajdlwpkfzclakggrbpk.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphamRsd3BrZnpjbGFrZ2dyYnBrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE5MjYxODUsImV4cCI6MjA1NzUwMjE4NX0.lQMt2o2aZNRtNJVJs4UlP-qA17CE3a6zBto24Ho19ZM', // Store securely instead of hardcoding
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphamRsd3BrZnpjbGFrZ2dyYnBrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE5MjYxODUsImV4cCI6MjA1NzUwMjE4NX0.lQMt2o2aZNRtNJVJs4UlP-qA17CE3a6zBto24Ho19ZM', // Store securely instead of hardcoding
   );
   runApp(const MyApp());
 }
@@ -31,7 +32,8 @@ class _MyAppState extends State<MyApp> {
     // Listen for authentication changes and refresh UI
     Supabase.instance.client.auth.onAuthStateChange.listen((event) {
       setState(() {
-        _homePage = _redirectUserBasedOnRole(); // Refresh role check when user logs in/out
+        _homePage =
+            _redirectUserBasedOnRole(); // Refresh role check when user logs in/out
       });
     });
   }
@@ -80,7 +82,9 @@ class _MyAppState extends State<MyApp> {
       print("DEBUG: Supabase response: $response");
 
       // ❌ If role is null or empty, deny access
-      if (response == null || !response.containsKey('role') || response['role'] == null) {
+      if (response == null ||
+          !response.containsKey('role') ||
+          response['role'] == null) {
         print("ERROR: User has NO assigned role! Redirecting to GymHomePage.");
         return GymHomePage(); // Prevent access if no role
       }
@@ -104,14 +108,7 @@ class _MyAppState extends State<MyApp> {
       return GymHomePage(); // Fallback in case of an error
     }
   }
-
 }
-
-
-
-
-
-
 
 class CircleButton extends StatelessWidget {
   final IconData icon;

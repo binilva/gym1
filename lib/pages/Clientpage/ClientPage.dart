@@ -7,6 +7,7 @@ import 'ExercisePage1.dart';
 import 'ShopPage1.dart';
 import 'attendance.dart';
 import 'payment.dart';
+import 'profile.dart';
 
 class ClientPage extends StatelessWidget {
   final String username;
@@ -53,6 +54,18 @@ class ClientPage extends StatelessWidget {
             icon: const Icon(Icons.logout),
             onPressed: () =>
                 _confirmLogout(context), // Show confirmation dialog
+          ),
+          IconButton(
+            icon: const Icon(Icons.person_2_rounded),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfilesScreen(
+                      username: username), // ✅ Pass the username correctly
+                ),
+              );
+            },
           ),
         ],
       ),
