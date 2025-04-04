@@ -6,6 +6,7 @@ import '../Homepage/GymHomePage.dart';
 import 'ExercisePage1.dart';
 import 'ShopPage1.dart';
 import 'attendance.dart';
+import 'clientcomplaint.dart';
 import 'payment.dart';
 import 'profile.dart';
 
@@ -196,6 +197,26 @@ class ClientPage extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 15),
+
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ComplaintForm(
+                                username:
+                                    username, // ✅ CORRECTLY passing the email
+                              ),
+                            ),
+                          );
+                        },
+                        child: CircleButton(
+                          icon: Icons.shopping_cart,
+                          color: Colors.blue,
+                          label: 'Post Your Complaints',
+                          imageurl: "images/posture.jpg",
+                        ),
+                      ),
 
                       // Additional Shop Button 3
                     ],

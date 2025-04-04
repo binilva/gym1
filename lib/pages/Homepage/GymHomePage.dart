@@ -36,8 +36,10 @@ class GymHomePage extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) =>
-                              const LoginPage(isTrainer: false)),
+                          builder: (context) => const LoginPage(
+                                isTrainer: false,
+                                isOwner: false,
+                              )),
                     );
                   },
                   child: const Text('Client', style: TextStyle(fontSize: 22)),
@@ -48,11 +50,27 @@ class GymHomePage extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) =>
-                              const LoginPage(isTrainer: true)),
+                          builder: (context) => const LoginPage(
+                                isOwner: false,
+                                isTrainer: true,
+                              )),
                     );
                   },
                   child: const Text('Trainer', style: TextStyle(fontSize: 22)),
+                ),
+                const SizedBox(height: 50),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const LoginPage(
+                                isOwner: true,
+                                isTrainer: false,
+                              )),
+                    );
+                  },
+                  child: const Text('Owner', style: TextStyle(fontSize: 22)),
                 ),
               ],
             ),

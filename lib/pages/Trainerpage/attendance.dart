@@ -48,8 +48,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     }
   }
 
-  // Rest of your code remains unchanged...
-
   Future<void> fetchAttendance() async {
     setState(() => isLoading = true);
     try {
@@ -83,6 +81,17 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   }
 
   Future<void> toggleAttendance(String date) async {
+    final today = DateTime.now();
+    final todayStr =
+        "${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
+
+    if (date != todayStr) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("You can only update today's attendance.")),
+      );
+      return;
+    }
+
     if (selectedName == null || selectedEmail == null) {
       print("❌ No name selected.");
       return;
@@ -91,7 +100,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
     bool isMarked = attendance[date]?.contains(selectedName) ?? false;
 
     if (isMarked) {
-      // Remove attendance
       try {
         await supabase.from('attendance').delete().match({
           'date': date,
@@ -108,7 +116,6 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
         print("❌ Error removing attendance: $error");
       }
     } else {
-      // Mark attendance
       try {
         await supabase.from('attendance').insert({
           'date': date,
@@ -131,6 +138,7 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
   Widget build(BuildContext context) {
     int daysInMonth =
         DateTime(currentMonth.year, currentMonth.month + 1, 0).day;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -206,13 +214,25 @@ class _AttendanceScreenState extends State<AttendanceScreen> {
                     "${currentMonth.year}-${currentMonth.month.toString().padLeft(2, '0')}-${(index + 1).toString().padLeft(2, '0')}";
                 bool isMarked =
                     attendance[dateKey]?.contains(selectedName) ?? false;
+
+                final today = DateTime.now();
+                final isToday = today.year == currentMonth.year &&
+                    today.month == currentMonth.month &&
+                    today.day == index + 1;
+
                 return GestureDetector(
-                  onTap: () => toggleAttendance(dateKey),
+                  onTap: isToday ? () => toggleAttendance(dateKey) : null,
                   child: Container(
                     margin: const EdgeInsets.all(2),
                     decoration: BoxDecoration(
-                      color: isMarked ? Colors.blue : Colors.grey.shade300,
+                      color: isMarked
+                          ? Colors.blue
+                          : isToday
+                              ? Colors.grey.shade300
+                              : Colors.grey.shade200,
                       borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                          color: isToday ? Colors.black : Colors.transparent),
                     ),
                     alignment: Alignment.center,
                     child: Text(

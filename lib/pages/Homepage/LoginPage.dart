@@ -2,28 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../Clientpage/ClientPage.dart';
+import '../Owner/OwnerPage.dart';
 import '../Trainerpage/TrainerPage.dart';
 import 'ForgotPasswordPage.dart';
 import 'SignUpPage.dart';
 
 class LoginPage extends StatefulWidget {
   final bool isTrainer;
-  const LoginPage({super.key, required this.isTrainer});
+  final bool isOwner;
+
+  const LoginPage({super.key, required this.isTrainer, required this.isOwner});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _supabase = Supabase.instance.client;
   bool isLoading = false;
 
   Future<void> _login() async {
-    if (_nameController.text.isEmpty || _passwordController.text.isEmpty) {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please fill all fields.')));
+        const SnackBar(content: Text('Please fill all fields.')),
+      );
       return;
     }
 
@@ -31,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       final response = await _supabase.auth.signInWithPassword(
-        email: _nameController.text.trim(),
+        email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
@@ -45,33 +49,41 @@ class _LoginPageState extends State<LoginPage> {
             .eq('user_id', userId)
             .maybeSingle(); // Use maybeSingle() to avoid crashes
 
-        // 🛑 If role is missing, prevent login
         if (roleResponse == null || !roleResponse.containsKey('role')) {
           print("ERROR: No role assigned to user!");
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text('Your account has no assigned role.')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Your account has no assigned role.')),
+          );
           await _supabase.auth.signOut(); // Log out user to prevent access
           setState(() => isLoading = false);
           return;
         }
 
-        final role = roleResponse['role'];
+        final role = roleResponse['role'].toLowerCase(); // Normalize role
         print("DEBUG: Logged-in user role: $role");
 
-        // ✅ Only allow login if role matches selected type
+        // ✅ Navigate based on user role
         if (role == 'trainer' && widget.isTrainer) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-                builder: (context) =>
-                    TrainerPage(username: response.user!.email!)),
+              builder: (context) =>
+                  TrainerPage(username: response.user!.email!),
+            ),
           );
-        } else if (role == 'client' && !widget.isTrainer) {
+        } else if (role == 'client' && !widget.isTrainer && !widget.isOwner) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-                builder: (context) =>
-                    ClientPage(username: response.user!.email!)),
+              builder: (context) => ClientPage(username: response.user!.email!),
+            ),
+          );
+        } else if (role == 'owner' && widget.isOwner) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OwnerPage(username: response.user!.email!),
+            ),
           );
         } else {
           print("ERROR: Unauthorized login attempt.");
@@ -86,7 +98,8 @@ class _LoginPageState extends State<LoginPage> {
           .showSnackBar(SnackBar(content: Text(e.message)));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Something went wrong. Try again.')));
+        const SnackBar(content: Text('Something went wrong. Try again.')),
+      );
     }
 
     setState(() => isLoading = false);
@@ -94,9 +107,18 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    String title;
+    if (widget.isOwner) {
+      title = "Owner Login";
+    } else if (widget.isTrainer) {
+      title = "Trainer Login";
+    } else {
+      title = "Client Login";
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isTrainer ? 'Trainer Login' : 'Client Login'),
+        title: Text(title),
         centerTitle: true,
         backgroundColor: Colors.indigo[600],
       ),
@@ -105,7 +127,7 @@ class _LoginPageState extends State<LoginPage> {
         child: Column(
           children: [
             TextField(
-              controller: _nameController,
+              controller: _emailController,
               decoration: const InputDecoration(labelText: 'Email'),
               keyboardType: TextInputType.emailAddress,
             ),
@@ -135,7 +157,8 @@ class _LoginPageState extends State<LoginPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const ForgotPasswordPage()),
+                    builder: (context) => const ForgotPasswordPage(),
+                  ),
                 );
               },
               child: const Text("Forgot Password?"),

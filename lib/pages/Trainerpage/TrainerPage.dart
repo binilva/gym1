@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gym/pages/Owner/complain.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../main.dart';
@@ -170,6 +171,22 @@ class TrainerPage extends StatelessWidget {
                           color: Colors.orange,
                           label: 'Exercise',
                           imageurl: "images/exercies.jpg",
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ComplaintsList()),
+                          );
+                        },
+                        child: CircleButton(
+                          icon: Icons.fitness_center,
+                          color: Colors.orange,
+                          label: 'compliats',
+                          imageurl: "images/posture.jpg",
                         ),
                       ),
                       const SizedBox(height: 15),
