@@ -10,6 +10,7 @@ import '../Trainerpage/attendance.dart';
 import 'Addmembers.dart';
 import 'ExercisePage.dart';
 import 'PayPage.dart';
+import 'complain.dart';
 
 class TrainerPage extends StatelessWidget {
   final String username;
@@ -193,6 +194,23 @@ class TrainerPage extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 15),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ComplaintsList()),
+                          );
+                        },
+                        child: CircleButton(
+                          icon: Icons.fitness_center,
+                          color: Colors.orange,
+                          label: 'complient',
+                          imageurl: "images/comp2.webp",
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+
                       // Circular Shop Button
                     ],
                   ),

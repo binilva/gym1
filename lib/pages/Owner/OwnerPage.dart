@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gym/ChatBotPage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../main.dart';
@@ -189,7 +190,7 @@ class OwnerPage extends StatelessWidget {
                           icon: Icons.fitness_center,
                           color: Colors.orange,
                           label: 'complient',
-                          imageurl: "images/posture.jpg",
+                          imageurl: "images/comp2.webp",
                         ),
                       ),
                       const SizedBox(height: 15),
@@ -204,11 +205,15 @@ class OwnerPage extends StatelessWidget {
             right: 20,
             width: 100,
             height: 70,
+            // Smaller size for the circle butto
             child: ElevatedButton(
               onPressed: () {
-                print("AI Button Pressed!");
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ChatBotPage()),
+                );
               },
-              child: const Text(
+              child: Text(
                 'AI',
                 style: TextStyle(fontSize: 22, color: Colors.green),
               ),
