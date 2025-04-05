@@ -52,14 +52,14 @@ class _PaymentListViewState extends State<PaymentListView> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _payments.isEmpty
-              ? const Center(child: Text('No payments found'))
-              : ListView.builder(
-                  itemCount: _payments.length,
-                  itemBuilder: (context, index) {
-                    final payment = _payments[index];
-                    return PaymentCard(payment: payment);
-                  },
-                ),
+          ? const Center(child: Text('No payments found'))
+          : ListView.builder(
+        itemCount: _payments.length,
+        itemBuilder: (context, index) {
+          final payment = _payments[index];
+          return PaymentCard(payment: payment);
+        },
+      ),
     );
   }
 }

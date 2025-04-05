@@ -40,19 +40,30 @@ dependencies:
   cupertino_icons: ^1.0.8
   supabase_flutter: ^2.0.0
   file_picker: ^9.2.1
+  http: ^1.3.0 # For making API requests
+  video_player: ^2.8.2  # Use the latest version
+  image_picker: ^0.8.4+4
+  camera: ^0.10.5+2
   chewie: ^1.7.4
   intl: ^0.20.2
+  provider: ^6.0.5
+  shared_preferences: ^2.2.2
   razorpay_flutter: ^1.4.0
-  image_picker: ^1.0.7
-  path_provider: ^2.1.2
   mime: ^1.0.4
   permission_handler: ^11.0.0
+  share_plus: ^7.2.1
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
+  flutter_launcher_icons: ^0.14.3  # Check for latest version
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/icon/icons8-fitness-94.png" # Replace with your icon path
+  adaptive_icon_background: "#B2EBF2"  # Background color for Android adaptive icons
+  adaptive_icon_foreground: "assets/icon/icons8-fitness-94.png" # Foreground for adaptive icon
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your

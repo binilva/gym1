@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:gym/pages/Clientpage/ExercisePage2.dart';
+import 'package:gym/pages/Clientpage/profile.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../ChatBotPage.dart';
 import '../../main.dart';
 import '../Homepage/GymHomePage.dart';
 import 'ExercisePage1.dart';
-import 'ShopPage1.dart';
-import 'attendance.dart';
-import 'clientcomplaint.dart';
-import 'payment.dart';
-import 'profile.dart';
+import 'PayPage1.dart';
+import 'ShopPage.dart';
+import 'attendance1.dart';
 
 class ClientPage extends StatelessWidget {
   final String username;
@@ -49,7 +50,7 @@ class ClientPage extends StatelessWidget {
       appBar: AppBar(
         title: Text('Client Page'),
         centerTitle: true,
-        backgroundColor: Colors.indigo[600],
+        backgroundColor: Colors.blue[600],
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -109,9 +110,8 @@ class ClientPage extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => PaymentScreen(
-                                      username: '',
-                                    )),
+                                builder: (context) =>
+                                    PaymentScreen(username: username)),
                           );
                         },
                         child: CircleButton(
@@ -147,8 +147,7 @@ class ClientPage extends StatelessWidget {
                           // Navigate to Shop Page
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                                builder: (context) => ShopPage1()),
+                            MaterialPageRoute(builder: (context) => ShopPage()),
                           );
                         },
                         child: CircleButton(
@@ -175,18 +174,19 @@ class ClientPage extends StatelessWidget {
                           icon: Icons.person_2_outlined,
                           color: Colors.red,
                           label: 'Your attendance',
-                          imageurl: "images/attendance.webp",
+                          imageurl: "images/attend.jpg",
                         ),
                       ),
                       SizedBox(height: 15),
 
+                      // Additional Shop Button 3
                       GestureDetector(
                         onTap: () {
                           // Navigate to Shop Page
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => ShopPage1()),
+                                builder: (context) => ExercisePage1()),
                           );
                         },
                         child: CircleButton(
@@ -197,28 +197,6 @@ class ClientPage extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 15),
-
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ComplaintForm(
-                                username:
-                                    username, // ✅ CORRECTLY passing the email
-                              ),
-                            ),
-                          );
-                        },
-                        child: CircleButton(
-                          icon: Icons.shopping_cart,
-                          color: Colors.blue,
-                          label: 'Post Your Complaints',
-                          imageurl: "images/posture.jpg",
-                        ),
-                      ),
-
-                      // Additional Shop Button 3
                     ],
                   ),
                 ],
@@ -234,8 +212,10 @@ class ClientPage extends StatelessWidget {
             // Smaller size for the circle button
             child: ElevatedButton(
               onPressed: () {
-                // Define your AI button action here
-                print("AI Button Pressed!");
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ChatBotPage()),
+                );
               },
               child: Text(
                 'AI',

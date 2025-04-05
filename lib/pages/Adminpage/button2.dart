@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class ShopPage1 extends StatelessWidget {
+class button2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Gym Shop')),
+      appBar: AppBar(
+        title: Text('Gym Shop'),
+        backgroundColor: Colors.indigo[600],
+      ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),

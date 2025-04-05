@@ -23,23 +23,21 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration.zero, () {
-      fetchProfiles();
-      listenToProfileUpdates();
-    });
+    fetchProfiles();
+    listenToProfileUpdates();
   }
 
   Future<void> fetchProfiles() async {
     try {
-      final List<dynamic> response =
-          await supabase.from('profiles').select().eq('email', widget.username);
+      final response = await supabase.from('profiles').select().eq('email', widget.username);
       if (mounted) {
         setState(() {
-          profiles = response.cast<Map<String, dynamic>>();
+          profiles = List<Map<String, dynamic>>.from(response);
           isLoading = false;
         });
       }
     } catch (e) {
+      print("\u274c Error fetching profile: $e");
       if (mounted) {
         setState(() => isLoading = false);
       }
@@ -52,54 +50,31 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
         .stream(primaryKey: ['user_id'])
         .eq('email', widget.username)
         .listen((data) {
-          if (mounted) {
-            setState(() {
-              profiles = data.cast<Map<String, dynamic>>();
-            });
-          }
-        });
+      if (mounted) {
+        setState(() => profiles = List<Map<String, dynamic>>.from(data));
+      }
+    });
   }
 
-  Future<void> updateProfile(
-      String id,
-      String name,
-      String email,
-      String role,
-      double? height,
-      double? weight,
-      int? age,
-      String? dob,
-      String? imageUrl) async {
-    await supabase.from('profiles').update({
-      'name': name,
-      'email': email,
-      'role': role,
-      'height': height,
-      'weight': weight,
-      'age': age,
-      'date_of_birth': dob,
-      if (imageUrl != null) 'image_url': imageUrl,
-    }).eq('user_id', id);
-
-    fetchProfiles();
+  Future<void> updateProfile(String id, Map<String, dynamic> updatedData) async {
+    try {
+      await supabase.from('profiles').update(updatedData).eq('user_id', id);
+      fetchProfiles();
+    } catch (e) {
+      print("\u274c Error updating profile: $e");
+    }
   }
 
   void showEditDialog(BuildContext context, Map<String, dynamic> profile) {
-    TextEditingController nameController =
-        TextEditingController(text: profile['name'] ?? '');
-    TextEditingController emailController =
-        TextEditingController(text: profile['email'] ?? '');
-    TextEditingController roleController =
-        TextEditingController(text: profile['role'] ?? '');
-    TextEditingController heightController =
-        TextEditingController(text: profile['height']?.toString() ?? '');
-    TextEditingController weightController =
-        TextEditingController(text: profile['weight']?.toString() ?? '');
-    TextEditingController ageController =
-        TextEditingController(text: profile['age']?.toString() ?? '');
-    TextEditingController dobController =
-        TextEditingController(text: profile['date_of_birth'] ?? '');
+    TextEditingController nameController = TextEditingController(text: profile['name'] ?? '');
+    TextEditingController emailController = TextEditingController(text: profile['email'] ?? '');
+    TextEditingController roleController = TextEditingController(text: profile['role'] ?? '');
+    TextEditingController heightController = TextEditingController(text: profile['height']?.toString() ?? '');
+    TextEditingController weightController = TextEditingController(text: profile['weight']?.toString() ?? '');
+    TextEditingController ageController = TextEditingController(text: profile['age']?.toString() ?? '');
+    TextEditingController dobController = TextEditingController(text: profile['date_of_birth'] ?? '');
     String? imageUrl = profile['image_url'];
+    bool isUploading = false;
 
     showDialog(
       context: context,
@@ -110,69 +85,53 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(
-                    controller: nameController,
-                    decoration: const InputDecoration(labelText: 'Name')),
-                TextField(
-                    controller: emailController,
-                    decoration: const InputDecoration(labelText: 'Email')),
-                TextField(
-                    controller: roleController,
-                    decoration: const InputDecoration(labelText: 'Role')),
-                TextField(
-                    controller: heightController,
-                    decoration: const InputDecoration(labelText: 'Height (cm)'),
-                    keyboardType: TextInputType.number),
-                TextField(
-                    controller: weightController,
-                    decoration: const InputDecoration(labelText: 'Weight (kg)'),
-                    keyboardType: TextInputType.number),
-                TextField(
-                    controller: ageController,
-                    decoration: const InputDecoration(labelText: 'Age'),
-                    keyboardType: TextInputType.number),
-                TextField(
-                    controller: dobController,
-                    decoration:
-                        const InputDecoration(labelText: 'Date of Birth')),
-                if (imageUrl != null && imageUrl!.isNotEmpty)
-                  Image.network(imageUrl!,
-                      height: 100, width: 100, fit: BoxFit.cover),
+                TextField(controller: nameController, decoration: const InputDecoration(labelText: 'Name')),
+                TextField(controller: emailController, decoration: const InputDecoration(labelText: 'Email')),
+                TextField(controller: roleController, decoration: const InputDecoration(labelText: 'Role')),
+                TextField(controller: heightController, decoration: const InputDecoration(labelText: 'Height (cm)'), keyboardType: TextInputType.number),
+                TextField(controller: weightController, decoration: const InputDecoration(labelText: 'Weight (kg)'), keyboardType: TextInputType.number),
+                TextField(controller: ageController, decoration: const InputDecoration(labelText: 'Age'), keyboardType: TextInputType.number),
+                TextField(controller: dobController, decoration: const InputDecoration(labelText: 'Date of Birth')),
+
+                if (imageUrl?.isNotEmpty == true)
+                  Image.network(imageUrl!, height: 100, width: 100, fit: BoxFit.cover),
+
                 TextButton(
                   onPressed: () async {
                     final ImagePicker picker = ImagePicker();
-                    final XFile? pickedFile =
-                        await picker.pickImage(source: ImageSource.gallery);
+                    final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
                     if (pickedFile != null) {
-                      String? uploadedUrl =
-                          await uploadImage(File(pickedFile.path));
+                      setDialogState(() => isUploading = true);
+                      String? uploadedUrl = await uploadImage(File(pickedFile.path), profile['user_id']);
+
                       if (uploadedUrl != null) {
-                        setDialogState(() => imageUrl = uploadedUrl);
+                        setDialogState(() {
+                          imageUrl = uploadedUrl;
+                          isUploading = false;
+                        });
                       }
                     }
                   },
-                  child: const Text('Change Image'),
+                  child: isUploading ? const CircularProgressIndicator() : const Text('Change Image'),
                 ),
               ],
             ),
           ),
           actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel')),
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
             TextButton(
               onPressed: () {
-                updateProfile(
-                  profile['user_id'],
-                  nameController.text,
-                  emailController.text,
-                  roleController.text,
-                  double.tryParse(heightController.text),
-                  double.tryParse(weightController.text),
-                  int.tryParse(ageController.text),
-                  dobController.text,
-                  imageUrl,
-                );
+                updateProfile(profile['user_id'], {
+                  'name': nameController.text,
+                  'email': emailController.text,
+                  'role': roleController.text,
+                  'height': double.tryParse(heightController.text),
+                  'weight': double.tryParse(weightController.text),
+                  'age': int.tryParse(ageController.text),
+                  'date_of_birth': dobController.text,
+                  if (imageUrl?.isNotEmpty == true) 'image_url': imageUrl,
+                });
                 Navigator.pop(context);
               },
               child: const Text('Submit'),
@@ -183,21 +142,22 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
     );
   }
 
-  Future<String?> uploadImage(File imageFile) async {
+  Future<String?> uploadImage(File imageFile, String userId) async {
     try {
-      final String filePath =
-          'profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final String filePath = 'profiles/$userId/profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
       await supabase.storage.from('profileimages').upload(filePath, imageFile);
-      return supabase.storage.from('profileimages').getPublicUrl(filePath);
+      String publicUrl = supabase.storage.from('profileimages').getPublicUrl(filePath);
+      await supabase.from('profiles').update({'image_url': publicUrl}).eq('user_id', userId);
+      return publicUrl;
     } catch (e) {
+      print("\u274c Image Upload Error: $e");
       return null;
     }
   }
 
   @override
   void dispose() {
-    _subscription
-        ?.cancel(); // Unsubscribes from the stream to prevent memory leaks
+    _subscription?.cancel();
     super.dispose();
   }
 
@@ -208,65 +168,28 @@ class _ProfilesScreenState extends State<ProfilesScreen> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : profiles.isEmpty
-              ? const Center(
-                  child:
-                      Text("No profile found", style: TextStyle(fontSize: 20)))
-              : Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: profiles.map((profile) {
-                        return Card(
-                          elevation: 4,
-                          margin: const EdgeInsets.symmetric(vertical: 10),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              children: [
-                                if (profile['image_url'] != null &&
-                                    profile['image_url'].isNotEmpty)
-                                  Image.network(profile['image_url'],
-                                      height: 150,
-                                      width: 150,
-                                      fit: BoxFit.cover),
-                                const SizedBox(height: 20),
-                                Text("Name: ${profile['name'] ?? 'No Name'}",
-                                    style: const TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold)),
-                                Text("Email: ${profile['email'] ?? 'No Email'}",
-                                    style: const TextStyle(fontSize: 22)),
-                                Text("Role: ${profile['role'] ?? 'No Role'}",
-                                    style: const TextStyle(fontSize: 22)),
-                                Text(
-                                    "Height: ${profile['height']?.toString() ?? 'N/A'} cm",
-                                    style: const TextStyle(fontSize: 22)),
-                                Text(
-                                    "Weight: ${profile['weight']?.toString() ?? 'N/A'} kg",
-                                    style: const TextStyle(fontSize: 22)),
-                                Text(
-                                    "Age: ${profile['age']?.toString() ?? 'N/A'}",
-                                    style: const TextStyle(fontSize: 22)),
-                                Text(
-                                    "DOB: ${profile['date_of_birth'] ?? 'N/A'}",
-                                    style: const TextStyle(fontSize: 22)),
-                                const SizedBox(height: 20),
-                                ElevatedButton(
-                                  onPressed: () =>
-                                      showEditDialog(context, profile),
-                                  child: const Text('Edit Profile',
-                                      style: TextStyle(fontSize: 20)),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ),
+          ? const Center(child: Text("No profile found", style: TextStyle(fontSize: 20)))
+          : ListView.builder(
+        itemCount: profiles.length,
+        itemBuilder: (context, index) {
+          final profile = profiles[index];
+          return Card(
+            elevation: 4,
+            margin: const EdgeInsets.all(10),
+            child: ListTile(
+              leading: (profile['image_url']?.isNotEmpty == true)
+                  ? CircleAvatar(backgroundImage: NetworkImage(profile['image_url']!))
+                  : const CircleAvatar(child: Icon(Icons.person)),
+              title: Text(profile['name'] ?? 'No Name', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              subtitle: Text("Role: ${profile['role'] ?? 'No Role'}\nEmail: ${profile['email'] ?? 'No Email'}"),
+              trailing: IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () => showEditDialog(context, profile),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }
