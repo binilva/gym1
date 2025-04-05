@@ -172,6 +172,7 @@ class _AddmembersState extends State<Addmembers> {
                 value: _selectedRole,
                 items: const [
                   DropdownMenuItem(value: 'client', child: Text('Client')),
+                  DropdownMenuItem(value: 'trainer', child: Text('trainer')),
                 ],
                 onChanged: (value) {
                   setState(() => _selectedRole = value!);
