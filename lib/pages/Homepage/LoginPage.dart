@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../Adminpage/AdminPage.dart';
 import '../Clientpage/ClientPage.dart';
 import '../Owner/OwnerPage.dart';
 import '../Trainerpage/TrainerPage.dart';
@@ -10,8 +11,16 @@ import 'SignUpPage.dart';
 class LoginPage extends StatefulWidget {
   final bool isTrainer;
   final bool isOwner;
+  final bool isClient;
+  final bool isAdmin;
 
-  const LoginPage({super.key, required this.isTrainer, required this.isOwner});
+  const LoginPage({
+    super.key,
+    required this.isTrainer,
+    required this.isOwner,
+    required this.isClient,
+    required this.isAdmin,
+  });
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -42,27 +51,25 @@ class _LoginPageState extends State<LoginPage> {
       if (response.user != null) {
         final userId = response.user!.id;
 
-        // ✅ Fetch role from the Supabase database
         final roleResponse = await _supabase
             .from('profiles')
             .select('role')
             .eq('user_id', userId)
-            .maybeSingle(); // Use maybeSingle() to avoid crashes
+            .maybeSingle();
 
         if (roleResponse == null || !roleResponse.containsKey('role')) {
           print("ERROR: No role assigned to user!");
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Your account has no assigned role.')),
           );
-          await _supabase.auth.signOut(); // Log out user to prevent access
+          await _supabase.auth.signOut();
           setState(() => isLoading = false);
           return;
         }
 
-        final role = roleResponse['role'].toLowerCase(); // Normalize role
+        final role = roleResponse['role'].toLowerCase();
         print("DEBUG: Logged-in user role: $role");
 
-        // ✅ Navigate based on user role
         if (role == 'trainer' && widget.isTrainer) {
           Navigator.pushReplacement(
             context,
@@ -71,7 +78,7 @@ class _LoginPageState extends State<LoginPage> {
                   TrainerPage(username: response.user!.email!),
             ),
           );
-        } else if (role == 'client' && !widget.isTrainer && !widget.isOwner) {
+        } else if (role == 'client' && widget.isClient) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -85,12 +92,21 @@ class _LoginPageState extends State<LoginPage> {
               builder: (context) => OwnerPage(username: response.user!.email!),
             ),
           );
+        } else if (role == 'admin' && widget.isAdmin) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Adminpage(
+                  username: response.user!
+                      .email!), // You can change to AdminPage if you have one
+            ),
+          );
         } else {
           print("ERROR: Unauthorized login attempt.");
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Unauthorized login attempt!')),
           );
-          await _supabase.auth.signOut(); // Log out user to prevent access
+          await _supabase.auth.signOut();
         }
       }
     } on AuthException catch (e) {
@@ -112,8 +128,12 @@ class _LoginPageState extends State<LoginPage> {
       title = "Owner Login";
     } else if (widget.isTrainer) {
       title = "Trainer Login";
-    } else {
+    } else if (widget.isClient) {
       title = "Client Login";
+    } else if (widget.isAdmin) {
+      title = "Admin Login";
+    } else {
+      title = "Login";
     }
 
     return Scaffold(

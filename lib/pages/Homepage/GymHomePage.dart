@@ -39,6 +39,8 @@ class GymHomePage extends StatelessWidget {
                           builder: (context) => const LoginPage(
                                 isTrainer: false,
                                 isOwner: false,
+                                isAdmin: false,
+                                isClient: true,
                               )),
                     );
                   },
@@ -53,6 +55,8 @@ class GymHomePage extends StatelessWidget {
                           builder: (context) => const LoginPage(
                                 isOwner: false,
                                 isTrainer: true,
+                                isClient: false,
+                                isAdmin: false,
                               )),
                     );
                   },
@@ -67,11 +71,30 @@ class GymHomePage extends StatelessWidget {
                           builder: (context) => const LoginPage(
                                 isOwner: true,
                                 isTrainer: false,
+                                isClient: false,
+                                isAdmin: false,
                               )),
                     );
                   },
                   child: const Text('Owner', style: TextStyle(fontSize: 22)),
                 ),
+                const SizedBox(height: 50),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const LoginPage(
+                                isOwner: false,
+                                isTrainer: false,
+                                isClient: false,
+                                isAdmin: true,
+                              )),
+                    );
+                  },
+                  child: const Text('Admin', style: TextStyle(fontSize: 22)),
+                ),
+                const SizedBox(height: 50),
               ],
             ),
           ),

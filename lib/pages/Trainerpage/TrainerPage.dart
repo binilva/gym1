@@ -117,7 +117,9 @@ class TrainerPage extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => Addmembers()),
+                                builder: (context) => Addmembers(
+                                      username: username,
+                                    )),
                           );
                         },
                         child: CircleButton(
